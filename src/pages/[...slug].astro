@@ -1,0 +1,42 @@
+---
+export async function getStaticPaths() {
+    const schemaUrl = 'https://raw.githubusercontent.com/cloudflare/api-schemas/main/openapi.json';
+    const response = await fetch(schemaUrl, {
+      method: 'GET',
+    });
+
+    const data = await response.json();
+    const amendedData = data["paths"]
+    let operationIds = [];
+
+    for (const path in amendedData) {
+        const methods = amendedData[path];
+
+        for (const method in methods) {
+            const operation = methods[method];
+            const operationId = operation.operationId;
+
+            if (operationId) {
+                operationIds.push({"slug": "operations/" + operationId, "summary": operation.summary, "description": operation.description});
+            }
+        }
+    }
+  return operationIds.map(({ slug, summary, description }) => {
+    return {
+      params: { slug },
+      props: { summary, description },
+    };
+  });
+}
+
+const { summary, description } = Astro.props;
+---
+<html>
+  <head>
+    <title>{summary}</title>
+  </head>
+  <body>
+    <h1>{summary}</h1>
+    <p>{description}</p>
+  </body>
+</html>
