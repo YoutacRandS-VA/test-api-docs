@@ -1,45 +1,41 @@
 ---
-import * as fs from 'fs';
-import * as yaml from 'js-yaml';
+import * as schemaJSON from '../../schemas/test3.json'
+import { Debug } from 'astro:components';
 
 export async function getStaticPaths() {
-
-  const fileContents = fs.readFileSync('/Users/kody/Desktop/test-api-docs/callous-chasm/schemas/test6.yml', 'utf8');
-  const yamlData = yaml.load(fileContents);
-
-  if (yamlData) {
-    console.log('YAML Data:', yamlData);
-  }
-    
+  
   let dataArray = [];
-  let endpoint = "";
 
-  for (const path of yamlData.paths) {
-    endpoint = path;
-    for (const operation of path ) {
+  for (const path in schemaJSON["paths"]) {
+    for (const operationKey of Object.keys(schemaJSON["paths"][path])) {
+      const operation = schemaJSON["paths"][path][operationKey];
+      if (operation["operationId"]) {
       dataArray.push({
-        "endpoint": endpoint,
-        "operation": operation,
+        "endpoint": path,
+        "operation": operationKey,
         "operationId": operation["operationId"],
-        "tags": operation["tags"][0],
+        "tags": operation["tags"] && operation["tags"].length > 0 ? operation["tags"][0] : null,
         "summary": operation["summary"],
         "description": operation["description"],
-        "parameters": operation["parameters"],
+        "parameters": operation["parameters"] || [],
+        "requestBody": operation["requestBody"] || null,
         "responses": operation["responses"],
         "security": operation["security"],
-      })
+        "slug": '/operations/' + operation["operationId"],
+      });
     }
   }
+}
 
-  return dataArray.map(({ endpoint, operation, operationId, tags, summary, description, parameters, responses, security }) => {
+  return dataArray.map(({ endpoint, operation, operationId, tags, summary, description, parameters, responses, security, slug, requestBody }) => {
     return {
-      params: { operationId },
-      props: { endpoint, operation, tags, summary, description, parameters, responses, security },
+      params: { slug },
+      props: { endpoint, operation, tags, summary, description, parameters, responses, security, operationId, requestBody },
     };
   });
 }
 
-const { summary, description } = Astro.props;
+const { endpoint, operation, tags, summary, description, parameters, responses, security, operationId, requestBody } = Astro.props;
 ---
 <html>
   <head>
@@ -48,5 +44,13 @@ const { summary, description } = Astro.props;
   <body>
     <h1>{summary}</h1>
     <p>{description}</p>
+    <p>{endpoint}</p>
+    <p>{operation}</p>
+    <p>{tags}</p>
+    <p>{operationId}</p>
+    <Debug {parameters} />
+    <Debug {requestBody} />
+    <Debug {responses} />
+    <Debug {security} />
   </body>
 </html>

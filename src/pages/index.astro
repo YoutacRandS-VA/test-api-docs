@@ -1,24 +1,33 @@
 ---
-import * as fs from 'fs';
-import * as yaml from 'js-yaml';
-import { Debug } from 'astro:components';
-const fileContents = fs.readFileSync('/Users/kody/Desktop/test-api-docs/callous-chasm/schemas/test6.yml', 'utf8');
-const yamlData = JSON.stringify(yaml.load(fileContents));
+const schemaUrl = 'https://raw.githubusercontent.com/cloudflare/api-schemas/main/openapi.json';
+    const response = await fetch(schemaUrl, {
+      method: 'GET',
+    });
 
-
+    const data = await response.json();
+    const amendedData = data["paths"]
     let operationIds = [];
 
+    for (const path in amendedData) {
+        const methods = amendedData[path];
 
+        for (const method in methods) {
+            const operation = methods[method];
+            const operationId = operation.operationId;
+
+            if (operationId) {
+                operationIds.push("/operations/" + operationId);
+            }
+        }
+    }
 ---
 
 
 	<html>
 		<h1>API test</h1>
-    <p>{yamlData}</p>
 		<ul>
 			{operationIds.map((operationId) => (
 			  <li><a href={operationId}>{operationId}</a></li>
 			))}
 		  </ul>
 	</html>
-  <Debug answer={yamlData} />
