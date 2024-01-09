@@ -1,5 +1,5 @@
 ---
-import * as schemaJSON from '../../schemas/test3.json'
+import * as schemaJSON from '../../schemas/test-special-output.json'
 import { Debug } from 'astro:components';
 
 export async function getStaticPaths() {
@@ -22,20 +22,22 @@ export async function getStaticPaths() {
         "responses": operation["responses"],
         "security": operation["security"],
         "slug": '/operations/' + operation["operationId"],
+        "planAvailability": operation["x-cfPlanAvailability"] || null,
+        "tokenPermissions": operation["x-cfPermissionsRequired"] || null,
       });
     }
   }
 }
 
-  return dataArray.map(({ endpoint, operation, operationId, tags, summary, description, parameters, responses, security, slug, requestBody }) => {
+  return dataArray.map(({ endpoint, operation, operationId, tags, summary, description, parameters, responses, security, slug, requestBody, planAvailability, tokenPermissions }) => {
     return {
       params: { slug },
-      props: { endpoint, operation, tags, summary, description, parameters, responses, security, operationId, requestBody },
+      props: { endpoint, operation, tags, summary, description, parameters, responses, security, operationId, requestBody, planAvailability, tokenPermissions },
     };
   });
 }
 
-const { endpoint, operation, tags, summary, description, parameters, responses, security, operationId, requestBody } = Astro.props;
+const { endpoint, operation, tags, summary, description, parameters, responses, security, operationId, requestBody, planAvailability, tokenPermissions } = Astro.props;
 ---
 <html>
   <head>
@@ -48,6 +50,8 @@ const { endpoint, operation, tags, summary, description, parameters, responses, 
     <p>{operation}</p>
     <p>{tags}</p>
     <p>{operationId}</p>
+    <Debug {planAvailability} />
+    <Debug {tokenPermissions} />
     <Debug {parameters} />
     <Debug {requestBody} />
     <Debug {responses} />
