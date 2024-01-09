@@ -1,30 +1,40 @@
 ---
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
+
 export async function getStaticPaths() {
-    const schemaUrl = 'https://raw.githubusercontent.com/cloudflare/api-schemas/main/openapi.json';
-    const response = await fetch(schemaUrl, {
-      method: 'GET',
-    });
 
-    const data = await response.json();
-    const amendedData = data["paths"]
-    let operationIds = [];
+  const fileContents = fs.readFileSync('/Users/kody/Desktop/test-api-docs/callous-chasm/schemas/test6.yml', 'utf8');
+  const yamlData = yaml.load(fileContents);
 
-    for (const path in amendedData) {
-        const methods = amendedData[path];
+  if (yamlData) {
+    console.log('YAML Data:', yamlData);
+  }
+    
+  let dataArray = [];
+  let endpoint = "";
 
-        for (const method in methods) {
-            const operation = methods[method];
-            const operationId = operation.operationId;
-
-            if (operationId) {
-                operationIds.push({"slug": "operations/" + operationId, "summary": operation.summary, "description": operation.description});
-            }
-        }
+  for (const path of yamlData.paths) {
+    endpoint = path;
+    for (const operation of path ) {
+      dataArray.push({
+        "endpoint": endpoint,
+        "operation": operation,
+        "operationId": operation["operationId"],
+        "tags": operation["tags"][0],
+        "summary": operation["summary"],
+        "description": operation["description"],
+        "parameters": operation["parameters"],
+        "responses": operation["responses"],
+        "security": operation["security"],
+      })
     }
-  return operationIds.map(({ slug, summary, description }) => {
+  }
+
+  return dataArray.map(({ endpoint, operation, operationId, tags, summary, description, parameters, responses, security }) => {
     return {
-      params: { slug },
-      props: { summary, description },
+      params: { operationId },
+      props: { endpoint, operation, tags, summary, description, parameters, responses, security },
     };
   });
 }
