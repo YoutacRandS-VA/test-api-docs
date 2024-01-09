@@ -10,8 +10,10 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@apidevtools/swagger-parser": "^10.1.0",
     "@astrojs/check": "^0.3.4",
     "astro": "^4.1.0",
+    "js-yaml": "^4.1.0",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
