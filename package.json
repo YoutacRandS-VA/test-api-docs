@@ -12,7 +12,7 @@
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
     "@astrojs/check": "^0.3.4",
-    "astro": "^4.1.0",
+    "astro": "^4.16.1",
     "js-yaml": "^4.1.0",
     "typescript": "^5.3.3"
   },
